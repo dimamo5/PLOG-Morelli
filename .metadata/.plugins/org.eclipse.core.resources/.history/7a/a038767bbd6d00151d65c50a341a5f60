@@ -1,0 +1,19 @@
+/* imprime uma determinada lista X, N vezes */
+
+imprime(N,X):-
+        N > 1,
+        N1 is N-1,
+        imprime_aux(X),
+        imprime(N1,X).
+ 
+imprime(1,_). /* caso base */    
+
+imprime_aux([H|T]):-
+        mostra(H),
+        imprime_aux(T).
+
+imprime_aux([]). /* caso base */
+
+mostra(H):-
+        write(H).
+

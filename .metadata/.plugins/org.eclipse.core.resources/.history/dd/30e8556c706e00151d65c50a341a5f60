@@ -5,6 +5,9 @@ estado_inicial([[random_gen,random_gen,random_gen,random_gen,random_gen],
       
 load:-use_module(library(random)).
 
+random_gen(Val):-
+        random(0,2,Val).
+
 cenas:-
         estado_inicial(Tab),
         imprime_tab(Tab).
@@ -35,13 +38,9 @@ imprime_aux([H|T]):-
 
 imprime_aux([]). /* caso base */
 
+mostra(H):-
+        write(H).
+
 mostra(random_gen):-
-       random_gen(X),
-       write(X).
-
-mostra(' '):-
-        write(' ').
-
-random_gen(V):-
-        random(0,2,V).
+        X is 
 

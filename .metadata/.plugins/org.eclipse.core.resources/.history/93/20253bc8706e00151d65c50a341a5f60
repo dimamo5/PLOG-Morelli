@@ -39,8 +39,8 @@ mostra(random_gen):-
        random_gen(X),
        write(X).
 
-mostra(' '):-
-        write(' ').
+mostra(H):-
+        write(H).
 
 random_gen(V):-
         random(0,2,V).

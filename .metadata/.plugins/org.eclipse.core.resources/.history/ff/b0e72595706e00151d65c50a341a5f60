@@ -35,12 +35,12 @@ imprime_aux([H|T]):-
 
 imprime_aux([]). /* caso base */
 
-mostra(random_gen):-
-       random_gen(X),
-       write(X).
+mostra(H):-
+        write(H).
 
-mostra(' '):-
-        write(' ').
+mostra(random_gen):-
+        X is random_gen(X),
+        write(X).
 
 random_gen(V):-
         random(0,2,V).
