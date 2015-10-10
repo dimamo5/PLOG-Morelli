@@ -1,0 +1,93 @@
+load:-use_module(library(random)).
+
+estado_inicial([[random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen],
+               [random_gen,b,b,b,b,b,b,b,random_gen],
+               [random_gen,b,b,b,b,b,b,b,random_gen],
+               [random_gen,b,b,b,b,b,b,b,random_gen],
+               [random_gen,b,b,b,b,b,b,b,random_gen],
+               [random_gen,b,b,b,b,b,b,b,random_gen],
+               [random_gen,b,b,b,b,b,b,b,random_gen],
+               [random_gen,b,b,b,b,b,b,b,random_gen],
+               [random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen]]).
+      
+top_bot_linha([random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen,random_gen]).
+mid_linha([random_gen,b,b,b,b,b,b,b,random_gen]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% testing zone %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+line([random_gen,b,b,b,b,b]).
+
+test:-  load,
+        line([_|T]),
+        random(0,2,X),
+        append(X,T,L),
+        inverte(X,V),
+        append(L,V,L),     
+        write(L).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+inverte_valores_linha([Head|Tail]):-
+        inverte(Head),
+        inverte_valores_linha(Tail).
+        
+inverte(0,X):-
+        X is 1+0.
+inverte(1,X):-
+        X is 0+0.
+        
+
+
+%%%%%%%%%% Funcao main %%%%%%%%%%
+cenas:-
+        load,
+        estado_inicial(Tab),
+        imprime_tab(Tab).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+imprime_tab(Tab):-
+        imprime_linhas(Tab).
+        
+ 
+imprime_linhas([Head|Tail]):-
+        imprime_aux(Head),nl,
+        imprime_linhas(Tail).       
+
+
+/* imprime uma determinada lista X, N vezes */
+imprime(N,X):-
+        N > 1,
+        N1 is N-1,
+        imprime_aux(X),
+        imprime(N1,X).
+ 
+imprime(1,_). /* caso base */    
+
+/*funçao auxiliar que imprime no ecra*/
+imprime_aux([H|T]):-
+        mostra(H), %write(b),
+        imprime_aux(T).
+
+imprime_aux([]). /* caso base */
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+mostra(random_gen):-
+       random_gen(X),
+       mostra(X).
+
+mostra(b):-
+        write('| ').
+mostra(0):-
+        write('X').
+mostra(1):-
+        write('O').
+
+random_gen(V):-
+        random(0,2,V).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

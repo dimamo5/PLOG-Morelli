@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="se.sics.sicstus.launching.launchConfigurationType1">
 <booleanAttribute key="ATTR_ATTACH_TOPLEVEL" value="true"/>
+<stringAttribute key="ATTR_ATTACH_TOPLEVEL_ID" value="Toplevel 1"/>
 <stringAttribute key="ATTR_EXECUTABLE" value="C:\Program Files\SICStus Prolog VC12 4.3.2\bin\sicstus.exe"/>
-<stringAttribute key="ATTR_WORKING_DIRECTORY" value="C:\Users\Utilizador"/>
+<stringAttribute key="ATTR_WORKING_DIRECTORY" value="C:\Users\Utilizador\Google Drive\3º ano\1º semestre\PLOG\PLOG-Morelli\Morelli\src"/>
 <booleanAttribute key="REMOTE_ATTACH" value="false"/>
 <booleanAttribute key="org.eclipse.debug.ui.private" value="true"/>
 <stringAttribute key="process_factory_id" value="se.sics.sicstus.id.PrologProcessFactory"/>

@@ -1,0 +1,75 @@
+load:-use_module(library(random)).
+
+%estado_inicial([[r,r,r,r,r,r,r,r,r],...    
+top_bot_linha([r,r,r,r,r,r,r,r,r]).     %r: valor random      
+mid_linha([r,b,b,b,b,b,b,b]).           %b: espaço em branco
+
+main:-
+        completa_top_line(top_bot_linha,[],E),
+        append([],E,Tab), %adiciona linha ao Tab | Tab : representa o tabuleiro final
+        completa_mid_line([_|T],E). % TODO: completar aqui
+
+
+%adiciona valor random no inicio da lista e o seu inverso no final da lista [0...1] ou [1....0]
+completa_mid_line([_|T],E):-  % _E corresponde à lista a retornar pela funcção
+         random(0,2,X),
+         H is X,
+         append([H],T,L),
+         inverte(X,V),
+         append(L,[V],E).
+        
+completa_top_line([H|T],L,E):-
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%% Funcao main %%%%%%%%%%
+cenas:-
+        load,
+        estado_inicial(Tab),
+        imprime_tab(Tab).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+imprime_tab(Tab):-
+        imprime_linhas(Tab).
+        
+ 
+imprime_linhas([Head|Tail]):-
+        imprime_aux(Head),nl,
+        imprime_linhas(Tail).       
+
+
+/* imprime uma determinada lista X, N vezes */
+imprime(N,X):-
+        N > 1,
+        N1 is N-1,
+        imprime_aux(X),
+        imprime(N1,X).
+ 
+imprime(1,_). /* caso base */    
+
+/*funçao auxiliar que imprime no ecra*/
+imprime_aux([H|T]):-
+        mostra(H), %write(b),
+        imprime_aux(T).
+
+imprime_aux([]). /* caso base */
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+mostra(r):-
+       random_gen(X),
+       mostra(X).
+
+mostra(b):-
+        write('| ').
+mostra(0):-
+        write('|X').
+mostra(1):-
+        write('|O').
+
+random_gen(V):-
+        random(0,2,V).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
