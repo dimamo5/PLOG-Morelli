@@ -79,8 +79,8 @@ imprime_tab(Tab):-
         imprime_linhas(Tab).
         
  
-imprime_linhas([Head|Tail]):-   %descomentar em baixo para aspecto visual diferente
-        imprime_aux(Head), nl,  %write('|'), nl,imprime(13*2+2,['-']), nl,
+imprime_linhas([Head|Tail]):-
+        imprime_aux(Head), write('|'), nl,imprime(13*2+2,['-']), nl,
         imprime_linhas(Tail).
  
 imprime_linhas([]).

@@ -74,16 +74,17 @@ inverte(1,X):-  X is 0.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
 %%%%%%%%%%%%%%%%%% IMPRESSÃO DO TABULEIRO %%%%%%%%%%%%%%%%%%%%%%%
 
-imprime_tab(Tab):-     
+imprime_tab(Tab):-
+        write(' '),
         imprime(13*2+2,['_']),nl,
         imprime_linhas(Tab).
         
  
-imprime_linhas([Head|Tail]):-   %descomentar em baixo para aspecto visual diferente
-        imprime_aux(Head), nl,  %write('|'), nl,imprime(13*2+2,['-']), nl,
+imprime_linhas([Head|Tail]):-
+        imprime_aux(Head),write(' |'),nl,
         imprime_linhas(Tail).
  
-imprime_linhas([]).
+imprime_linhas([]).      
 
 /*funçao auxiliar que imprime no ecra*/
 imprime_aux([H|T]):-
@@ -120,3 +121,8 @@ mostra(X):-
 
 random_gen(V):-
         random(0,2,V).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
