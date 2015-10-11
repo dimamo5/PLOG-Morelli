@@ -12,7 +12,7 @@ tab([[]]).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%% Funcao main %%%%%%%%%%%%%%%%%%%%%%%%
 
-                %% TODO !!!!!!!!!!!!!!!!!!!
+                %% TODO
 %%%%%% ALTERAR GERAÇAO DAS LINHAS PARA ESTAREM DE ACORDO COM AS REGRAS
 %%%%%% ULTIMA LINHA = invert_color(reverse(1ª LINHA))
 %%%%%% LINHA DA DIREITA = invert_color(reverse(LINHA da esquerda))
@@ -26,8 +26,7 @@ main:-
        removehead(X,L), %remove 1º elemento (lista vazia -> efeito remeniscente)
        completa_bot_line(L,A),
        append(L,[A],K),
-       write(K).
-     %  imprime_tab(K).
+       imprime_tab(K).
              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 removehead([_|Tail], Tail).

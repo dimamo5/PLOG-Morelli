@@ -26,8 +26,7 @@ main:-
        removehead(X,L), %remove 1º elemento (lista vazia -> efeito remeniscente)
        completa_bot_line(L,A),
        append(L,[A],K),
-       write(K).
-     %  imprime_tab(K).
+       imprime_tab(K).
              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 removehead([_|Tail], Tail).
