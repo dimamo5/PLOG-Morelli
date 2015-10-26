@@ -1,0 +1,9 @@
+=.. permite construir uma estrutura a partir de uma lista
+P =.. [X,Y,Z]
+P passa a representar uma meta variavel
+
+util para projecto
+P :- read(X), P =.. [X,Y,Z], P.  // recebe input do user e conforme esse input calcula determinada coisa
+
+
+Uso de CUT para aumentar eficiência
