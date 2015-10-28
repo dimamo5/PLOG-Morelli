@@ -18,77 +18,89 @@ tab([[]]).
 %%%%%% LINHA DA DIREITA = invert_color(reverse(LINHA da esquerda))
 
 main:-
-       tamanho_tabuleiro(N),  tab(Tab),   mid_linha(M),    
-       completa_top_line(N,P),
-       append(Tab,[P],T),               
-       completa_mid_aux(11,M,O),
-       append(T,O,X),
-       removehead(X,L), %remove 1º elemento (lista vazia -> efeito remeniscente)
-       completa_bot_line(L,A),
-       append(L,[A],K),
-       write(K).
-     %  imprime_tab(K).
+       fillTabuleiro(13,Tab),
+       imprime_tab(Tab).
              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 removehead([_|Tail], Tail).
    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-completa_top_line(0, []).
+replace([_|T], 0, X, [X|T]).
+replace([H|T], I, X, [H|R]):- I > -1, NI is I-1, replace(T, NI, X, R), !.
+replace(L, _, _, L).
 
-completa_top_line(N, L) :-
-        N > 0,
-        N1 is N-1,
-        random_gen(X),
-        completa_top_line(N1, L1),
-        append(L1, [X], L).
+fillTabuleiro(Size,Tab):-
+       generateEmptyLine(Size,b,Line),          %Lista Random
+       generateEmptyLine(Size,Line,Tab1),       %Matriz
+       generateRandomLine(Size,Inicio),         %Primeira Fila
+       reverseLine(Inicio,Inverso),             %Ultima Fila
+       generateRandomLine(Size,Lateral),         
+       reverseLine(Lateral,InversoLateral),
+       generateSide(Size,Tab1,Lateral,InversoLateral,Tab2),
+       replace(Tab2,0,Inicio,Tab3),             %substitui primeira fila
+       Ultimo is Size-1,
+       replace(Tab3,Ultimo,Inverso,Tab).        %substitui ultima fila
 
-
-completa_mid_aux(0,_,_). %caso base
-
-completa_mid_aux(N,L,P):-
-        N > 0,
-        N1 is N-1,
-        completa_mid_line(L,E),       
-        completa_mid_aux(N1,L,X1),
-        append(X1,[E],P).
-                       
-
-%adiciona valor random no inicio da lista e o seu inverso no final da lista [0...1] ou [1....0]
-completa_mid_line([_|T],E):-  % _E corresponde à lista a retornar pela funcção
-         random_gen(X),
-         H is X,
-         append([H],T,L),
-         inverte(X,V),
-         append(L,[V],E).       
-
-
-completa_bot_line([H|_],P):-
-        invert_aux(H,X),
-        reverse(X,P).    %>>>>>>TODO: CORRIGIR BUG invert_aux depois remover esta chamada : reverse(...
+  
+generateSide(Size,[Lista|TTab],[HLateral|TLateral],[HLInverso|TInverso],[NovaLista1|NovaTab]):-
+        Size>0,
+        N1 is Size-1,
+        generateSide(N1,TTab,TLateral,TInverso,NovaTab),
+        length(Lista,Tamanho),
+        Tamanho1 is Tamanho -1,     
+        replace(Lista,Tamanho1,HLInverso,NovaLista),
+        replace(NovaLista,0,HLateral,NovaLista1).
         
+generateSide(0,[],[],[],[]).        
+             
 
-invert_aux([H|T],P):-
+generateEmptyLine(Size,Elem,List):-
+         Size > 0,
+         N1 is Size-1,
+         generateEmptyLine(N1,Elem,List1),
+         append(List1,[Elem],List).
+         
+
+generateEmptyLine(0,_,[]).
+
+generateRandomLine(0,[]).
+
+generateRandomLine(Size,Line):- 
+        Size > 0,
+        Size1 is Size-1,
+        random_gen(X),
+        generateRandomLine(Size1, Line1),
+        append(Line1, [X], Line).
+
+
+reverseLine(L,L1):-
+        reverse(L,ListaInvertida),
+        reverseLineAux(ListaInvertida,L1).
+
+reverseLineAux([],[]).
+
+reverseLineAux([H|T],[X|P]):-
         inverte(H,X),
-        invert_aux(T,P1),  
-        append(P1,[X],P).  %TODO>>>se trocar para append([X],P1,P) devolve list na ordem certa mas com elemento a +, ex: [1,0,1|_A]
+        reverseLineAux(T,P).  
+          %TODO>>>se trocar para append([X],P1,P) devolve list na ordem certa mas com elemento a +, ex: [1,0,1|_A]
 
-invert_aux([],_).              % caso base         
+              % caso base         
        
-inverte(0,X):-  X is 1.
-inverte(1,X):-  X is 0.   
+inverte(0,1).
+inverte(1,0).   
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
 %%%%%%%%%%%%%%%%%% IMPRESSÃO DO TABULEIRO %%%%%%%%%%%%%%%%%%%%%%%
 
-line_graphic(['    ','   A  ', '   B  ','   C  ','   D  ','   E  ' ,'   F  ','   G  '
-             ,'   H  ','   I  ','   J  ','   K  ','   L  ','   M  ']).  
+line_graphic(['    ',' A ', ' B ',' C ',' D ',' E ' ,' F ',' G '
+             ,' H ',' I ',' J ',' K ',' L ',' M ']).  
 
 imprime_tab(Tab):-
         line_graphic(L),
         imprime_aux(L), nl, 
         write('   '),     
-        imprime(13*6+3,['-']), nl,
+        imprime(13*3+3,['-']), nl,
         imprime_linhas(Tab,1).
 
 aux(N):-
@@ -104,7 +116,7 @@ imprime_linhas([Head|Tail],N):-   %descomentar em baixo para aspecto visual dife
         N1 is N+1,
         aux(N),
         imprime_aux(Head),  write(' |'),nl,
-         write('   '), imprime(13*6+3,['-']), nl,
+         write('   '), imprime(13*3+3,['-']), nl,
         imprime_linhas(Tail,N1).
 
  
@@ -134,14 +146,32 @@ mostra(r):-
        mostra(X).
 
 mostra(b):-
-        write('   .  ').
+        write(' . ').
 mostra(0):-
-        write('   x  ').
+        write(' x ').
 mostra(1):-
-        write('   o  ').
+        write(' o ').
 
 mostra(X):-
         write(X).
 
 random_gen(V):-
         random(0,2,V).
+
+
+/* menu */
+logo :-  nl, write('***   MORRELLI  ***'), nl, nl.
+
+start :- repeat, write('\33\[2J'), nl, logo, write(' ---- MENU ----'), nl, nl,
+                        write('1. Player vs Player'),nl, 
+                        write('2. Player vs Computer'),nl, 
+                        write('3. Computer vs Computer'),nl, 
+                        write('4. Exit'), nl, nl,
+                        write('Write the number of the option followed by a dot.'), nl,
+                        read(C), C>0, C=<4, number(C), choice(C).
+
+/* Menu Options */
+choice(1) :- main.
+choice(2) :- main.
+choice(3) :- main.
+choice(4) :- abort.
