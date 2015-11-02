@@ -40,7 +40,7 @@ fillTabuleiro(Size,Tab):-
        generateSide(Size,Tab1,Lateral,InversoLateral,Tab2),
        replace(Tab2,0,Inicio,Tab3),             %substitui primeira fila
        Ultimo is Size-1,
-       replace(Tab3,Ultimo,Inverso,Tab).        %substitui ultima fila
+       replace(Tab3,Ultimo,Inverso,Tab),!.        %substitui ultima fila
 
   
 generateSide(Size,[Lista|TTab],[HLateral|TLateral],[HLInverso|TInverso],[NovaLista1|NovaTab]):-
@@ -88,7 +88,26 @@ reverseLineAux([H|T],[X|P]):-
               % caso base         
        
 inverte(0,1).
-inverte(1,0).   
+inverte(1,0).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
+%%%%%%%%%%%%%%%%%% LOGICA %%%%%%%%%%%%%%%%%%%%%%%
+
+chooseMove(Board,Player,NewBoard):- write('Que peca deseja mover? Jogador '),((Player =:= 0, write('Jogador X'));(Player =:= 1,write('Jogador O'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
+                                                                                canUsePiece(Board,X,Y,Player),
+                                                                                write('New X = '), read(XF),nl, write('New Y = '),read(YF),nl,
+                                                                                validMove(Board,X,Y,XF,YF,Player,NewCost,NewestCost), 
+                                                                                movePiece(Board,X,Y,XF,YF,NewBoard2),
+                                                                                printTable(NewBoard2,XF,YF),
+                                                                                chooseMove(NewBoard2,Player,NewBoard,NewestCost),!.
+                                                                                
+chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Player,NewBoard),!.
+
+
+
+canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= Player.
+
+   
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
 %%%%%%%%%%%%%%%%%% IMPRESSÃO DO TABULEIRO %%%%%%%%%%%%%%%%%%%%%%%
@@ -101,7 +120,7 @@ imprime_tab(Tab):-
         imprime_aux(L), nl, 
         write('   '),     
         imprime(13*3+3,['-']), nl,
-        imprime_linhas(Tab,1).
+        imprime_linhas(Tab,1),!.
 
 aux(N):-
         N < 10,
@@ -162,7 +181,7 @@ random_gen(V):-
 /* menu */
 logo :-  nl, write('***   MORRELLI  ***'), nl, nl.
 
-start :- repeat, write('\33\[2J'), nl, logo, write(' ---- MENU ----'), nl, nl,
+start :- repeat, nl, logo, write(' ---- MENU ----'), nl, nl,
                         write('1. Player vs Player'),nl, 
                         write('2. Player vs Computer'),nl, 
                         write('3. Computer vs Computer'),nl, 
@@ -171,7 +190,7 @@ start :- repeat, write('\33\[2J'), nl, logo, write(' ---- MENU ----'), nl, nl,
                         read(C), C>0, C=<4, number(C), choice(C).
 
 /* Menu Options */
-choice(1) :- main.
-choice(2) :- main.
+choice(1) :- fillTabuleiro(13,Tab),chooseMove(Tab,
+choice(2) :- read(C),write(C).
 choice(3) :- main.
 choice(4) :- abort.
