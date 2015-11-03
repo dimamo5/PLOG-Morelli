@@ -101,11 +101,50 @@ chooseMove(Board,Player,NewBoard):- write('Que peca deseja mover? Jogador '),((P
                                                                                 printTable(NewBoard2,XF,YF),
                                                                                 chooseMove(NewBoard2,Player,NewBoard,NewestCost),!.
                                                                                 
-chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Player,NewBoard),!.
+chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Player,NewBoard),!.  %caso falhe
 
 
+validMove(Board,Size,X,Y,XF,YF,Player):-
+        %TODO: ver prox lina falha qd resultado = no
+        \+ pontosIguais(X,Y,XF,YF),                             % PosInicial != posFinal
+        canUsePiece(Board,X,Y,Player),                          % nao existe peca na Pos final
+        declive_recta(X,Y,XF,YF),                               % para ser diagonal declive = 1
+        verifyFrame(X,Y,XF,YF,Size/2 +1,Size/2 +1),             % verifica se esta a mover para o centro   
+        checkFreeWay(Board,X,Y,XF,YF).                          % tem caminho livre para Pos final
 
-canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= Player.
+
+% verifica se 2 pontos sao iguais
+pontosIguais(X,Y,XF,YF):- X == XF, Y == YF.    
+
+%verifica se o elemento 'Player' existe na coo (X,Y)
+canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= Player. 
+
+%verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
+%declive_recta(X,Y,XF,YF):-
+
+
+%verifica se esta a mover para o centro    
+verifyFrame(X,Y,XF,YF,XC,XC):-
+        frame(XF,YF,XC,YC,F1),    %frame ponto final
+        frame(X,Y,XC,YC,F2),      %frame ponto inicial
+        F2 > F1,
+        F1 \= 0.                  %impede jogada em que posFinal = posCentral
+
+       
+%frame de 1 ponto = distancia do centro ao ponto
+frame(X1,Y1,X2,Y2,R):-
+                R is sqrt(exp(X2,X1) + exp(Y2,Y1)). 
+           
+
+
+%verifica se nao existe nenhum elemento entre pos inicial e pos final
+
+ %checkFreeWay(Board,X,Y,XF,YF):
+         
+ %checkFreeWay(Board,X,Y,XF,YF):-
+         
+
+
 
    
 
@@ -178,7 +217,11 @@ random_gen(V):-
         random(0,2,V).
 
 
-/* menu */
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
+                        /* menu */
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
+
+
 logo :-  nl, write('***   MORRELLI  ***'), nl, nl.
 
 start :- repeat, nl, logo, write(' ---- MENU ----'), nl, nl,
@@ -190,7 +233,7 @@ start :- repeat, nl, logo, write(' ---- MENU ----'), nl, nl,
                         read(C), C>0, C=<4, number(C), choice(C).
 
 /* Menu Options */
-choice(1) :- fillTabuleiro(13,Tab),chooseMove(Tab,
+%choice(1) :- fillTabuleiro(13,Tab),chooseMove(Tab,
 choice(2) :- read(C),write(C).
 choice(3) :- main.
 choice(4) :- abort.
