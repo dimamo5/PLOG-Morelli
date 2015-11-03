@@ -107,20 +107,25 @@ chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(B
 validMove(Board,Size,X,Y,XF,YF,Player):-
         %TODO: ver prox lina falha qd resultado = no
         \+ pontosIguais(X,Y,XF,YF),                             % PosInicial != posFinal
-        canUsePiece(Board,X,Y,Player),                          % nao existe peca na Pos final
+        freeSpace(Board,XF,YF),                                                        % nao existe peca na Pos final
         declive_recta(X,Y,XF,YF),                               % para ser diagonal declive = 1
         verifyFrame(X,Y,XF,YF,Size/2 +1,Size/2 +1),             % verifica se esta a mover para o centro   
         checkFreeWay(Board,X,Y,XF,YF).                          % tem caminho livre para Pos final
 
 
 % verifica se 2 pontos sao iguais
-pontosIguais(X,Y,XF,YF):- X == XF, Y == YF.    
+pontosIguais(X,Y,XF,YF):- X =:= XF, Y =:= YF.    
 
 %verifica se o elemento 'Player' existe na coo (X,Y)
-canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= Player. 
+canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= Player.
+
+%verifica se peca está livre
+freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = 'b'. 
 
 %verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
-%declive_recta(X,Y,XF,YF):-
+declive_recta(X,Y,XF,YF):- X =:= XF.                    %seg recta vertical
+declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 0.       %seg recta horizontal
+declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 1.       %seg recta diagonal
 
 
 %verifica se esta a mover para o centro    
