@@ -109,7 +109,7 @@ validMove(Board,Size,X,Y,XF,YF,Player):-
         \+ pontosIguais(X,Y,XF,YF),                             % PosInicial != posFinal
         freeSpace(Board,XF,YF),                                                        % nao existe peca na Pos final
         declive_recta(X,Y,XF,YF),                               % para ser diagonal declive = 1
-        verifyFrame(X,Y,XF,YF,Size/2 +1,Size/2 +1),             % verifica se esta a mover para o centro   
+        verifyFrame(X,Y,XF,YF,Size),             % verifica se esta a mover para o centro   
         checkFreeWay(Board,X,Y,XF,YF).                          % tem caminho livre para Pos final
 
 
@@ -132,16 +132,17 @@ declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 1.       %seg recta diagonal
 
 
 %verifica se esta a mover para o centro    
-verifyFrame(X,Y,XF,YF,XC,XC):-
-        frame(XF,YF,XC,YC,F1),    %frame ponto final
-        frame(X,Y,XC,YC,F2),      %frame ponto inicial
+verifyFrame(X,Y,XF,YF,Size):-
+        C is round(Size/2),
+        frame(XF,YF,C,C,F1),    %frame ponto final
+        frame(X,Y,C,C,F2),      %frame ponto inicial
         F2 > F1,
-        F1 \= 0.                  %impede jogada em que posFinal = posCentral
+        F1 =\= 0.                  %impede jogada em que posFinal = posCentral
 
        
 %frame de 1 ponto = distancia do centro ao ponto
 frame(X1,Y1,X2,Y2,R):-
-                R is sqrt(exp(X2,X1) + exp(Y2,Y1)). 
+                R is sqrt(exp(X2-X1,2) + exp(Y2-Y1,2)). 
            
 
 %verifica se nao existe nenhum elemento entre pos inicial e pos final
