@@ -119,7 +119,10 @@ pontosIguais(X,Y,XF,YF):- X =:= XF, Y =:= YF.
 %verifica se o elemento 'Player' existe na coo (X,Y)
 canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= Player.
 
-%verifica se peca está livre
+%devolve valor de uma posicao no tabuleiro (r,b,1,0)..
+positionValue(Board,X,Y,V):- nth1(Y,Board,Linha),nth1(X,Linha,V).
+
+%verifica se pos(X,Y) está livre
 freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = 'b'. 
 
 %verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
@@ -141,17 +144,32 @@ frame(X1,Y1,X2,Y2,R):-
                 R is sqrt(exp(X2,X1) + exp(Y2,Y1)). 
            
 
-
 %verifica se nao existe nenhum elemento entre pos inicial e pos final
+checkFreeWay(Board,X,Y,XF,YF):-
+        \+ pontosIguais(X,Y,XF,YF),        %enquanto nao chegar a posFinal continua
+        decremento(X,Y,XF,YF,DX,DY),       %devolve decremento/incremento a ser aplicado
+        NewX is X + DX,                   
+        NewY is Y + DY,
+        freeSpace(Board,NewX,NewY),
+        checkFreeWay(Board,NewX,NewY,XF,YF).
+        
+%devolve decremento/incremento a aplicar nas coos para percorrer seg.recta [PoxI,PosF]        
+decremento(X,Y,XF,YF,DX,DY):-           %deslocamento diagonal
+        X =\= XF,
+        Y =\= YF,
+        DX is ((X-XF)/abs(X-XF)),
+        DY is ((Y-YF)/abs(Y-YF)).
 
- %checkFreeWay(Board,X,Y,XF,YF):
-         
- %checkFreeWay(Board,X,Y,XF,YF):-
-         
+decremento(X,Y,XF,YF,DX,DY):-           %deslocamento horizontal
+        X < XF,
+        DY is 0,
+        DX is ((X-XF)/abs(X-XF)).
 
-
-
-   
+decremento(X,Y,XF,YF,DX,DY):-           %deslocamento vertical
+        Y < YF,
+        DX is 0,
+        DY is ((Y-YF)/abs(Y-YF)).
+        
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
 %%%%%%%%%%%%%%%%%% IMPRESSÃO DO TABULEIRO %%%%%%%%%%%%%%%%%%%%%%%
