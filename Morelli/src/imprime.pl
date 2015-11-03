@@ -146,13 +146,16 @@ frame(X1,Y1,X2,Y2,R):-
 
 %verifica se nao existe nenhum elemento entre pos inicial e pos final
 checkFreeWay(Board,X,Y,XF,YF):-
-        \+ pontosIguais(X,Y,XF,YF),        %enquanto nao chegar a posFinal continua
-        decremento(X,Y,XF,YF,DX,DY),       %devolve decremento/incremento a ser aplicado
-        NewX is X + DX,                   
+        decremento(X,Y,XF,YF,DX,DY),            % devolve decremento/incremento a ser aplicado
+        checkFreeWayAux(Board,X,Y,XF,YF,DX,DY). % itera ate PosActual == PosFinal
+
+checkFreeWayAux(Board,X,Y,X2,Y2,DX,DY):-
+        \+ pontosIguais(X,Y,X2,Y2),          % enquanto nao chegar a posFinal continua
+        NewX is X + DX,                    
         NewY is Y + DY,
-        freeSpace(Board,NewX,NewY),
-        checkFreeWay(Board,NewX,NewY,XF,YF).
-        
+        freeSpace(Board,NewX,NewY),          % espaco esta livre
+        checkFreeWay(Board,NewX,NewY,X2,Y2).
+ 
 %devolve decremento/incremento a aplicar nas coos para percorrer seg.recta [PoxI,PosF]        
 decremento(X,Y,XF,YF,DX,DY):-           %deslocamento diagonal
         X =\= XF,
