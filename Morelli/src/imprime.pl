@@ -123,7 +123,7 @@ canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= P
 positionValue(Board,X,Y,V):- nth1(Y,Board,Linha),nth1(X,Linha,V).
 
 %verifica se pos(X,Y) está livre
-freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = 'b'. 
+freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = b. 
 
 %verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
 declive_recta(X,Y,XF,YF):- X =:= XF.                    %seg recta vertical
@@ -150,29 +150,31 @@ checkFreeWay(Board,X,Y,XF,YF):-
         decremento(X,Y,XF,YF,DX,DY),            % devolve decremento/incremento a ser aplicado
         checkFreeWayAux(Board,X,Y,XF,YF,DX,DY). % itera ate PosActual == PosFinal
 
+checkFreeWayAux(Board,X,Y,X2,Y2,DX,DY):-pontosIguais(X,Y,X2,Y2).
+
 checkFreeWayAux(Board,X,Y,X2,Y2,DX,DY):-
         \+ pontosIguais(X,Y,X2,Y2),          % enquanto nao chegar a posFinal continua
-        NewX is X + DX,                    
+        NewX is X + DX,                     
         NewY is Y + DY,
         freeSpace(Board,NewX,NewY),          % espaco esta livre
-        checkFreeWay(Board,NewX,NewY,X2,Y2).
+        checkFreeWayAux(Board,NewX,NewY,X2,Y2,DX,DY).
  
 %devolve decremento/incremento a aplicar nas coos para percorrer seg.recta [PoxI,PosF]        
 decremento(X,Y,XF,YF,DX,DY):-           %deslocamento diagonal
         X =\= XF,
         Y =\= YF,
-        DX is ((X-XF)/abs(X-XF)),
-        DY is ((Y-YF)/abs(Y-YF)).
+        DX is integer((XF-X)/abs(XF-X)),
+        DY is integer((YF-Y)/abs(YF-Y)).
 
 decremento(X,Y,XF,YF,DX,DY):-           %deslocamento horizontal
         X < XF,
         DY is 0,
-        DX is ((X-XF)/abs(X-XF)).
+        DX is integer((XF-X)/abs(XF-X)).
 
 decremento(X,Y,XF,YF,DX,DY):-           %deslocamento vertical
         Y < YF,
         DX is 0,
-        DY is ((Y-YF)/abs(Y-YF)).
+        DY is integer((YF-Y)/abs(YF-Y)).
         
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
