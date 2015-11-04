@@ -93,16 +93,40 @@ inverte(1,0).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
 %%%%%%%%%%%%%%%%%% LOGICA %%%%%%%%%%%%%%%%%%%%%%%
 
-chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover? Jogador '),((Player =:= 0, write('Jogador X'));(Player =:= 1,write('Jogador O'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
+%caso especifico: jogador nao tem mais movimentos possiveis e tem o trono, no entanto o outro jogador 
+%com 1 movimento consegue ocupar o trono, como proceder? Terminar assim que 1 jogador n tenha mais jogadas possiveis ?
+
+
+%LOOP DE JOGO
+play(Board,Size,0,Bot1,Bot2):-continueGame(Board,Size,0), whoPlays(Board,0,NewBoard,Bot1,Bot2),!,play(NewBoard,1,Bot1,Bot2).
+play(Board,Size,1,Bot1,Bot2):-continueGame(Board,Size,1), whoPlays(Board,1,NewBoard,Bot1,Bot2),!,play(NewBoard,0,Bot1,Bot2).
+
+
+play(Board,Size,_,_,_):-verificaVencedor(Board,Size,Winner),vencedor(Winner).
+
+
+verificaVencedor(Board,Size,Winner):-
+        C is round(Size/2)+1,
+        positionValue(Board,C,C,Winner).            
+
+
+vencedor(00):- write('Jogador X ganhou!').
+vencedor(11):- write('Jogador O ganhou!').
+vencedor(b):-  write('O jogo terminou com um empate!').
+
+
+playerTrone(1,11).
+playerTrone(0,00).
+
+chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover?'),((Player =:= 0, write('Jogador X'));(Player =:= 1,write('Jogador O'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
                                                                                 canUsePiece(Board,X,Y,Player),
                                                                                 write('New X = '), read(XF),nl, write('New Y = '),read(YF),nl,
                                                                                 validMove(Board,Size,X,Y,XF,YF,Player), 
-                                                                                movePiece(Board,X,Y,XF,YF,NewBoard2),
-                                                                                checkTrone(Board,Size,XF,YF,Player,NewBoard),
-                                                                                printTable(NewBoard2,XF,YF),
-                                                                                chooseMove(NewBoard2,Player,NewBoard,NewestCost),!.
+                                                                                movePiece(Board,X,Y,XF,YF,NewBoard2,PecasAlteradas),
+                                                                                changeTrone(NewBoard2,Size,PecasAlteradas,Player,NewBoard),
+                                                                                imprime_tab(NewBoard),!.
                                                                                 
-chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Player,NewBoard),!.  %caso falhe
+chooseMove(Board,Size,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Size,Player,NewBoard),!.  %caso falhe
 
 %modifica o trono se for necessario
 checkTrone(Board,Size,XF,YF,Player,NewBoard):-
@@ -118,8 +142,19 @@ checkTrone(Board,Size,XF,YF,Player,NewBoard):-
       positionValue(Board,X1,Y1,Player),
       positionValue(Board,X2,Y2,Player),
       positionValue(Board,X3,Y3,Player),
-      write('Did it boys').
-        
+      playerTrone(Player,Trone),
+      replaceElemMatrix(Board,C,C,Trone,NewBoard).
+
+
+changeTrone(Board,_,[],_,Board).
+
+changeTrone(Board,Size,[H|T],Player,NewBoard):-
+        nth0(0,H,X),
+        nth0(1,H,Y),
+        if(checkTrone(Board,Size,X,Y,Player,NewBoard),true,changeTrone(Board,Size,T,Player,NewBoard)).
+                
+                     
+%retorna a frame de uma peca        
 getPiecesFrame([X,Y],Size,Tamanho):-       
         C is round(Size/2),
         frame(X,Y,C,C,Tamanho).   
@@ -137,14 +172,15 @@ validMove(Board,Size,X,Y,XF,YF,Player):-
 
 
 %Mover a peca
-movePiece(Board,X,Y,XF,YF,NewBoard2):-
+movePiece(Board,X,Y,XF,YF,NewBoard2,PecasAlteradas):-
         positionValue(Board,X,Y,V),
         replaceElemMatrix(Board,X,Y,b,Board1),
         replaceElemMatrix(Board1,XF,YF,V,Board2),
-        findall(List,listPieceCapture(Board2,3,3,List),Bag),
+        findall(List,listPieceCapture(Board2,XF,YF,List),Bag),
+        append([[XF,YF]],Bag,PecasAlteradas),
         capturePiece(Board2,V,Bag,NewBoard2).
 
-%Lista todas as pecas a captura
+%Lista todas as pecas a capturar
 listPieceCapture(Board,X,Y,List):-
         positionValue(Board,X,Y,V),
         inverte(V,Adv),
