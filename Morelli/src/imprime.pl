@@ -1,5 +1,7 @@
 :-use_module(library(random)).
 :-use_module(library(lists)).
+:-use_module(library(between)).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%   GLOBALS  %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -26,11 +28,11 @@ removehead([_|Tail], Tail).
    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-replace([_|T], 0, X, [X|T]).
-replace([H|T], I, X, [H|R]):- I > -1, NI is I-1, replace(T, NI, X, R), !.
+replace([_|T], 1, X, [X|T]).
+replace([H|T], I, X, [H|R]):- I > 0, NI is I-1, replace(T, NI, X, R), !.
 replace(L, _, _, L).
 
-fillTabuleiro(Size,Tab):-
+fillTabuleiro(Tab,Size):-
        generateEmptyLine(Size,b,Line),          %Lista Random
        generateEmptyLine(Size,Line,Tab1),       %Matriz
        generateRandomLine(Size,Inicio),         %Primeira Fila
@@ -38,19 +40,17 @@ fillTabuleiro(Size,Tab):-
        generateRandomLine(Size,Lateral),         
        reverseLine(Lateral,InversoLateral),
        generateSide(Size,Tab1,Lateral,InversoLateral,Tab2),
-       replace(Tab2,0,Inicio,Tab3),             %substitui primeira fila
-       Ultimo is Size-1,
-       replace(Tab3,Ultimo,Inverso,Tab),!.        %substitui ultima fila
+       replace(Tab2,1,Inicio,Tab3),             %substitui primeira fila
+       replace(Tab3,Size,Inverso,Tab),!.        %substitui ultima fila
 
   
 generateSide(Size,[Lista|TTab],[HLateral|TLateral],[HLInverso|TInverso],[NovaLista1|NovaTab]):-
         Size>0,
         N1 is Size-1,
         generateSide(N1,TTab,TLateral,TInverso,NovaTab),
-        length(Lista,Tamanho),
-        Tamanho1 is Tamanho -1,     
-        replace(Lista,Tamanho1,HLInverso,NovaLista),
-        replace(NovaLista,0,HLateral,NovaLista1).
+        length(Lista,Tamanho),    
+        replace(Lista,Tamanho,HLInverso,NovaLista),
+        replace(NovaLista,1,HLateral,NovaLista1).
         
 generateSide(0,[],[],[],[]).        
              
@@ -93,17 +93,18 @@ inverte(1,0).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
 %%%%%%%%%%%%%%%%%% LOGICA %%%%%%%%%%%%%%%%%%%%%%%
 
-chooseMove(Board,Player,NewBoard):- write('Que peca deseja mover? Jogador '),((Player =:= 0, write('Jogador X'));(Player =:= 1,write('Jogador O'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
+chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover? Jogador '),((Player =:= 0, write('Jogador X'));(Player =:= 1,write('Jogador O'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
                                                                                 canUsePiece(Board,X,Y,Player),
                                                                                 write('New X = '), read(XF),nl, write('New Y = '),read(YF),nl,
-                                                                                validMove(Board,X,Y,XF,YF,Player,NewCost,NewestCost), 
+                                                                                validMove(Board,Size,X,Y,XF,YF,Player), 
                                                                                 movePiece(Board,X,Y,XF,YF,NewBoard2),
+                                                                                checkTrone(Board,Size,XF,YF,NewBoard),
                                                                                 printTable(NewBoard2,XF,YF),
                                                                                 chooseMove(NewBoard2,Player,NewBoard,NewestCost),!.
                                                                                 
 chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Player,NewBoard),!.  %caso falhe
 
-
+%Verifica se é possivel efectuar um movimento
 validMove(Board,Size,X,Y,XF,YF,Player):-
         %TODO: ver prox lina falha qd resultado = no
         \+ pontosIguais(X,Y,XF,YF),                             % PosInicial != posFinal
@@ -112,6 +113,45 @@ validMove(Board,Size,X,Y,XF,YF,Player):-
         verifyFrame(X,Y,XF,YF,Size),             % verifica se esta a mover para o centro   
         checkFreeWay(Board,X,Y,XF,YF).                          % tem caminho livre para Pos final
 
+
+%Mover a peca
+movePiece(Board,X,Y,XF,YF,NewBoard2):-
+        positionValue(Board,X,Y,V),
+        replaceElemMatrix(Board,X,Y,b,Board1),
+        replaceElemMatrix(Board1,XF,YF,V,Board2),
+        findall(List,listPieceCapture(Board2,3,3,List),Bag),
+        capturePiece(Board2,V,Bag,NewBoard2).
+
+%Lista todas as pecas a captura
+listPieceCapture(Board,X,Y,List):-
+        positionValue(Board,X,Y,V),
+        inverte(V,Adv),
+        between(-1,1,DiffX),
+        NewX is X+DiffX,
+        between(-1,1,DiffY),
+        NewY is Y+DiffY,
+        positionValue(Board,NewX,NewY,V1),
+        V1=Adv,
+        NewX2 is NewX+DiffX,
+        NewY2 is NewY+DiffY,
+        positionValue(Board,NewX2,NewY2,V),
+        List = [NewX,NewY].
+
+%Captura as pecas
+capturePiece(Board,_,[],Board).
+
+capturePiece(Board,Player,[H|T],Board2):-
+        nth0(0,H,X),
+        nth0(1,H,Y),
+        replaceElemMatrix(Board,X,Y,Player,NewBoard),
+        capturePiece(NewBoard,Player,T,Board2).
+        
+
+replaceElemMatrix(Board,X,Y,Elem,NewBoard):-
+        nth1(Y,Board,Lista),
+        replace(Lista,X,Elem,NovaLista),
+        replace(Board,Y,NovaLista,NewBoard).              
+        
 
 % verifica se 2 pontos sao iguais
 pontosIguais(X,Y,XF,YF):- X =:= XF, Y =:= YF.    
@@ -215,6 +255,7 @@ imprime_aux([H|T]):-
         imprime_aux(T).
 
 imprime_aux([]). /* caso base */
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
