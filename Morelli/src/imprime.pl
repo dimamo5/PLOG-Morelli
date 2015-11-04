@@ -104,6 +104,23 @@ play(Board,Size,1,Bot1,Bot2):-continueGame(Board,Size,1), whoPlays(Board,1,NewBo
 
 play(Board,Size,_,_,_):-verificaVencedor(Board,Size,Winner),vencedor(Winner).
 
+continueGame(Board,Size,Player):-
+        findall([X,Y],positionValue(Board,X,Y,Player),Bag),
+        generateMoves(Board,Size,1,7,[XV,YV],Bag).
+        
+
+getAllMoves([],_,_,[]).
+
+getAllMoves([H|T],Board,Size,Res):-
+        nth0(0,H,X),
+        nth0(1,H,Y),
+        findall([XV,YV],validMove(Board,Size,X,Y,XV,YV,_),Bag),
+        getAllMoves(T,Board,Size,Res1),
+        append(Res1,Bag,Res).
+        
+                                   
+
+
 
 verificaVencedor(Board,Size,Winner):-
         C is round(Size/2)+1,
@@ -152,12 +169,7 @@ changeTrone(Board,Size,[H|T],Player,NewBoard):-
         nth0(0,H,X),
         nth0(1,H,Y),
         if(checkTrone(Board,Size,X,Y,Player,NewBoard),true,changeTrone(Board,Size,T,Player,NewBoard)).
-                
-                     
-%retorna a frame de uma peca        
-getPiecesFrame([X,Y],Size,Tamanho):-       
-        C is round(Size/2),
-        frame(X,Y,C,C,Tamanho).   
+              
         
 generateMoves(Board,Size,X,Y,[XV,YV]):-
         between(1,Size,XV),between(1,Size,YV),validMove(Board,Size,X,Y,XV,YV,_).
@@ -170,11 +182,13 @@ imprimex([H|T]):-
 %Verifica se é possivel efectuar um movimento
 validMove(Board,Size,X,Y,XF,YF,Player):-
         %TODO: ver prox lina falha qd resultado = no
+        between(1,Size,XF),
+        between(1,Size,YF),
         \+ pontosIguais(X,Y,XF,YF),                             % PosInicial != posFinal
         freeSpace(Board,XF,YF),                                                        % nao existe peca na Pos final
         declive_recta(X,Y,XF,YF),                               % para ser diagonal declive = 1
         verifyFrame(X,Y,XF,YF,Size),             % verifica se esta a mover para o centro   
-        checkFreeWay(Board,X,Y,XF,YF),!.                          % tem caminho livre para Pos final
+        checkFreeWay(Board,X,Y,XF,YF).                          % tem caminho livre para Pos final
 
 
 %Mover a peca
@@ -230,9 +244,9 @@ positionValue(Board,X,Y,V):- nth1(Y,Board,Linha),nth1(X,Linha,V).
 freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = b. 
 
 %verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
-declive_recta(X,Y,XF,YF):- X =:= XF.                    %seg recta vertical
-declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 0.       %seg recta horizontal
-declive_recta(X,Y,XF,YF):- abs((YF-Y)/(XF-X)) =:= 1.       %seg recta diagonal
+declive_recta(X,Y,XF,YF):- X =:= XF,!.                    %seg recta vertical
+declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 0,!.       %seg recta horizontal
+declive_recta(X,Y,XF,YF):- abs((YF-Y)/(XF-X)) =:= 1,!.       %seg recta diagonal
 
 
 %verifica se esta a mover para o centro    
@@ -268,17 +282,17 @@ decremento(X,Y,XF,YF,DX,DY):-           %deslocamento diagonal
         X =\= XF,
         Y =\= YF,
         DX is integer((XF-X)/abs(XF-X)),
-        DY is integer((YF-Y)/abs(YF-Y)).
+        DY is integer((YF-Y)/abs(YF-Y)),!.
 
 decremento(X,Y,XF,YF,DX,DY):-           %deslocamento horizontal
-        X < XF,
+        Y=:=YF,
         DY is 0,
-        DX is integer((XF-X)/abs(XF-X)).
+        DX is integer((XF-X)/abs(XF-X)),!.
 
 decremento(X,Y,XF,YF,DX,DY):-           %deslocamento vertical
-        Y < YF,
+        X=:=XF,
         DX is 0,
-        DY is integer((YF-Y)/abs(YF-Y)).
+        DY is integer((YF-Y)/abs(YF-Y)),!.
         
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
