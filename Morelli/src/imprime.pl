@@ -159,7 +159,13 @@ getPiecesFrame([X,Y],Size,Tamanho):-
         C is round(Size/2),
         frame(X,Y,C,C,Tamanho).   
         
+generateMoves(Board,Size,X,Y,[XV,YV]):-
+        between(1,Size,XV),between(1,Size,YV),validMove(Board,Size,X,Y,XV,YV,_).
 
+imprimex([H|T]):-
+        write(H),
+        nl,
+        imprimex(T).
 
 %Verifica se é possivel efectuar um movimento
 validMove(Board,Size,X,Y,XF,YF,Player):-
@@ -168,7 +174,7 @@ validMove(Board,Size,X,Y,XF,YF,Player):-
         freeSpace(Board,XF,YF),                                                        % nao existe peca na Pos final
         declive_recta(X,Y,XF,YF),                               % para ser diagonal declive = 1
         verifyFrame(X,Y,XF,YF,Size),             % verifica se esta a mover para o centro   
-        checkFreeWay(Board,X,Y,XF,YF).                          % tem caminho livre para Pos final
+        checkFreeWay(Board,X,Y,XF,YF),!.                          % tem caminho livre para Pos final
 
 
 %Mover a peca
@@ -226,7 +232,7 @@ freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = b.
 %verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
 declive_recta(X,Y,XF,YF):- X =:= XF.                    %seg recta vertical
 declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 0.       %seg recta horizontal
-declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 1.       %seg recta diagonal
+declive_recta(X,Y,XF,YF):- abs((YF-Y)/(XF-X)) =:= 1.       %seg recta diagonal
 
 
 %verifica se esta a mover para o centro    
