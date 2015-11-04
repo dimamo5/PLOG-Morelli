@@ -106,7 +106,8 @@ play(Board,Size,_,_,_):-verificaVencedor(Board,Size,Winner),vencedor(Winner).
 
 continueGame(Board,Size,Player):-
         findall([X,Y],positionValue(Board,X,Y,Player),Bag),
-        generateMoves(Board,Size,1,7,[XV,YV],Bag).
+        getAllMoves(Bag,Board,Size,Res),
+        length(Res,Tamanho),Tamanho>1.
         
 
 getAllMoves([],_,_,[]).
@@ -116,7 +117,7 @@ getAllMoves([H|T],Board,Size,Res):-
         nth0(1,H,Y),
         findall([XV,YV],validMove(Board,Size,X,Y,XV,YV,_),Bag),
         getAllMoves(T,Board,Size,Res1),
-        append(Res1,Bag,Res).
+        append(Res1,Bag,Res). 
         
                                    
 
