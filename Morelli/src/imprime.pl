@@ -98,20 +98,26 @@ chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover? Jogador '
                                                                                 write('New X = '), read(XF),nl, write('New Y = '),read(YF),nl,
                                                                                 validMove(Board,Size,X,Y,XF,YF,Player), 
                                                                                 movePiece(Board,X,Y,XF,YF,NewBoard2),
-                                                                                checkTrone(Board,Size,XF,YF,NewBoard,Player),
+                                                                                checkTrone(Board,Size,XF,YF,Player,NewBoard),
                                                                                 printTable(NewBoard2,XF,YF),
                                                                                 chooseMove(NewBoard2,Player,NewBoard,NewestCost),!.
                                                                                 
 chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Player,NewBoard),!.  %caso falhe
 
 %modifica o trono se for necessario
-checkTrone(Board,Size,XF,YF,NewBoard):-
-      Frame is max(Size-XF,Size-YF),
-      X1 is integer((XF + Frame-1) / Frame),
-      Y1 is integer((YF + Frame-1) / Frame),
-      positionValue(Board,X1,YF,V),
-      positionValue(Board,XF,Y1,V),
-      positionValue(Board,X1,Y1,V),
+checkTrone(Board,Size,XF,YF,Player,NewBoard):-
+      C is round(Size/2),
+      DiffX is XF-C,
+      DiffY is YF-C,
+      X1 is -DiffX+C,
+      Y1 is DiffY+C,
+      X2 is DiffX+C,
+      Y2 is -DiffY+C,
+      X3 is -DiffX+C,
+      Y3 is -DiffY+C,
+      positionValue(Board,X1,Y1,Player),
+      positionValue(Board,X2,Y2,Player),
+      positionValue(Board,X3,Y3,Player),
       write('Did it boys').
         
 getPiecesFrame([X,Y],Size,Tamanho):-       
