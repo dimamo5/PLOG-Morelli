@@ -98,11 +98,25 @@ chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover? Jogador '
                                                                                 write('New X = '), read(XF),nl, write('New Y = '),read(YF),nl,
                                                                                 validMove(Board,Size,X,Y,XF,YF,Player), 
                                                                                 movePiece(Board,X,Y,XF,YF,NewBoard2),
-                                                                                checkTrone(Board,Size,XF,YF,NewBoard),
+                                                                                checkTrone(Board,Size,XF,YF,NewBoard,Player),
                                                                                 printTable(NewBoard2,XF,YF),
                                                                                 chooseMove(NewBoard2,Player,NewBoard,NewestCost),!.
                                                                                 
 chooseMove(Board,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Player,NewBoard),!.  %caso falhe
+
+%modifica o trono se for necessario
+checkTrone(Board,Size,XF,YF,NewBoard):-
+      Frame is max(Size-XF,Size-YF),
+      X1 is integer((XF + Frame-1) / Frame),
+      Y1 is integer((YF + Frame-1) / Frame),
+      positionValue(Board,X1,YF,V),
+      positionValue(Board,XF,Y1,V),
+      positionValue(Board,X1,Y1,V),
+      write('Did it boys').
+        
+        
+        
+
 
 %Verifica se é possivel efectuar um movimento
 validMove(Board,Size,X,Y,XF,YF,Player):-
