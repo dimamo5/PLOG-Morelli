@@ -114,7 +114,9 @@ checkTrone(Board,Size,XF,YF,NewBoard):-
       positionValue(Board,X1,Y1,V),
       write('Did it boys').
         
-        
+getPiecesFrame([X,Y],Size,Tamanho):-       
+        C is round(Size/2),
+        frame(X,Y,C,C,Tamanho).   
         
 
 
