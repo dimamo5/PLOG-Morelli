@@ -2,21 +2,12 @@
 :-use_module(library(lists)).
 :-use_module(library(between)).
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%   GLOBALS  %%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-tamanho_tabuleiro(13). 
-mid_linha([r,b,b,b,b,b,b,b,b,b,b,b]).           %b: espaço em branco
-tab([[]]).
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%% Funcao main %%%%%%%%%%%%%%%%%%%%%%%%
 
                 %% TODO !!!!!!!!!!!!!!!!!!!
-%%%%%% ALTERAR GERAÇAO DAS LINHAS PARA ESTAREM DE ACORDO COM AS REGRAS
-%%%%%% ULTIMA LINHA = invert_color(reverse(1ª LINHA))
+%%%%%% ALTERAR GERAï¿½AO DAS LINHAS PARA ESTAREM DE ACORDO COM AS REGRAS
+%%%%%% ULTIMA LINHA = invert_color(reverse(1ï¿½ LINHA))
 %%%%%% LINHA DA DIREITA = invert_color(reverse(LINHA da esquerda))
 
 main:-
@@ -98,11 +89,15 @@ inverte(1,0).
 
 
 %LOOP DE JOGO
-play(Board,Size,0,Bot1,Bot2):-continueGame(Board,Size,0), whoPlays(Board,0,NewBoard,Bot1,Bot2),!,play(NewBoard,1,Bot1,Bot2).
-play(Board,Size,1,Bot1,Bot2):-continueGame(Board,Size,1), whoPlays(Board,1,NewBoard,Bot1,Bot2),!,play(NewBoard,0,Bot1,Bot2).
+play(Board,Size,0,Bot1,Bot2):-continueGame(Board,Size,0), whoPlays(Board,Size,0,NewBoard,Bot1,Bot2),!,play(NewBoard,Size,1,Bot1,Bot2).
+play(Board,Size,1,Bot1,Bot2):-continueGame(Board,Size,1), whoPlays(Board,Size,1,NewBoard,Bot1,Bot2),!,play(NewBoard,Size,0,Bot1,Bot2).
 
 
 play(Board,Size,_,_,_):-verificaVencedor(Board,Size,Winner),vencedor(Winner).
+
+
+whoPlays(Board,Size,Player,NewBoard,0,0):-chooseMove(Board,Size,Player,NewBoard).
+        
 
 continueGame(Board,Size,Player):-
         findall([X,Y],positionValue(Board,X,Y,Player),Bag),
@@ -180,7 +175,7 @@ imprimex([H|T]):-
         nl,
         imprimex(T).
 
-%Verifica se é possivel efectuar um movimento
+%Verifica se ï¿½ possivel efectuar um movimento
 validMove(Board,Size,X,Y,XF,YF,Player):-
         %TODO: ver prox lina falha qd resultado = no
         between(1,Size,XF),
@@ -241,7 +236,7 @@ canUsePiece(Board,X,Y,Player):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca =:= P
 %devolve valor de uma posicao no tabuleiro (r,b,1,0)..
 positionValue(Board,X,Y,V):- nth1(Y,Board,Linha),nth1(X,Linha,V).
 
-%verifica se pos(X,Y) está livre
+%verifica se pos(X,Y) estï¿½ livre
 freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = b. 
 
 %verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
@@ -297,10 +292,41 @@ decremento(X,Y,XF,YF,DX,DY):-           %deslocamento vertical
         
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
-%%%%%%%%%%%%%%%%%% IMPRESSÃO DO TABULEIRO %%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% IMPRESSï¿½O DO TABULEIRO %%%%%%%%%%%%%%%%%%%%%%%
 
 line_graphic(['    ',' A ', ' B ',' C ',' D ',' E ' ,' F ',' G '
-             ,' H ',' I ',' J ',' K ',' L ',' M ']).  
+             ,' H ',' I ',' J ',' K ',' L ',' M ']). 
+ 
+numberToLetter('A',1).
+numberToLetter('B',2).
+numberToLetter('C',3).
+numberToLetter('D',4).
+numberToLetter('E',5).
+numberToLetter('F',6).
+numberToLetter('G',7).
+numberToLetter('H',8).
+numberToLetter('I',9).
+numberToLetter('J',10).
+numberToLetter('K',11).
+numberToLetter('L',12).
+numberToLetter('M',13).
+
+printHeader(0).
+
+printHeader(Size):-
+        N is Size -1,
+        printHeader(N),
+        numberToLetter(X,Size),
+        write('  '),
+        write(X),
+        write('  ').
+
+printLine(Size,Espace):-
+        imprime(Espace,['|    ']),imprime((Size-2*Espace)*5,['-']),imprime(Espace,['    |']).
+        
+        
+
+
 
 imprime_tab(Tab):-
         line_graphic(L),
@@ -328,7 +354,7 @@ imprime_linhas([Head|Tail],N):-   %descomentar em baixo para aspecto visual dife
  
 imprime_linhas([],_).
 
-/*funçao auxiliar que imprime no ecra*/
+/*funï¿½ao auxiliar que imprime no ecra*/
 imprime_aux([H|T]):-
         mostra(H),
         imprime_aux(T).
@@ -340,12 +366,12 @@ imprime_aux([]). /* caso base */
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /* imprime uma determinada lista X, N vezes */
 imprime(N,X):-
-        N > 1,
+        N > 0,
         N1 is N-1,
         imprime_aux(X),
         imprime(N1,X).
  
-imprime(1,_). /* caso base */  
+imprime(0,_). /* caso base */  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 mostra(r):-
@@ -358,6 +384,10 @@ mostra(0):-
         write(' x ').
 mostra(1):-
         write(' o ').
+mostra(11):-
+        write(' O ').
+mostra(00):-
+        write(' X ').
 
 mostra(X):-
         write(X).
@@ -382,7 +412,7 @@ start :- repeat, nl, logo, write(' ---- MENU ----'), nl, nl,
                         read(C), C>0, C=<4, number(C), choice(C).
 
 /* Menu Options */
-%choice(1) :- fillTabuleiro(13,Tab),chooseMove(Tab,
+choice(1) :- fillTabuleiro(13,Tab),play(Tab,13,0,0,0).
 choice(2) :- read(C),write(C).
 choice(3) :- main.
 choice(4) :- abort.
