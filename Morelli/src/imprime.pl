@@ -97,6 +97,28 @@ play(Board,Size,_,_,_):-verificaVencedor(Board,Size,Winner),vencedor(Winner).
 
 
 whoPlays(Board,Size,Player,NewBoard,0,0):-chooseMove(Board,Size,Player,NewBoard).
+
+whoPlays(Board,Size,1,NewBoard,0,1):-randomMove(Board,Size,1,NewBoard).
+whoPlays(Board,Size,0,NewBoard,0,1):-chooseMove(Board,Size,0,NewBoard).
+
+whoPlays(Board,Size,Player,NewBoard,1,1):-randomMove(Board,Size,Player,NewBoard).
+
+        
+randomMove(Board,Size,Player,NewBoard):-
+        findall([X,Y],positionValue(Board,X,Y,Player),Bag),
+        getAllMoves(Bag,Board,Size,Res),
+        length(Res,Tamanho),
+        random(0,Tamanho,V),
+        nth0(V,Res,Mov),
+        nth0(0,Mov,X),nth0(1,Mov,Y),nth0(2,Mov,XF),nth0(3,Mov,YF),
+        movePiece(Board,X,Y,XF,YF,NewBoard2,PecasAlteradas),
+        changeTrone(NewBoard2,Size,PecasAlteradas,Player,NewBoard),
+        imprime_tab(NewBoard),nl,imprimeTrone(NewBoard,Size),!.
+
+imprimeTrone(Board,Size):-
+        C is round(Size/2),
+        positionValue(Board,C,C,Winner),
+        write(Winner),nl.
         
 
 continueGame(Board,Size,Player):-
@@ -105,12 +127,13 @@ continueGame(Board,Size,Player):-
         length(Res,Tamanho),Tamanho>1.
         
 
+
 getAllMoves([],_,_,[]).
 
 getAllMoves([H|T],Board,Size,Res):-
         nth0(0,H,X),
         nth0(1,H,Y),
-        findall([XV,YV],validMove(Board,Size,X,Y,XV,YV,_),Bag),
+        findall([X,Y,XV,YV],validMove(Board,Size,X,Y,XV,YV,_),Bag),
         getAllMoves(T,Board,Size,Res1),
         append(Res1,Bag,Res). 
         
@@ -119,19 +142,21 @@ getAllMoves([H|T],Board,Size,Res):-
 
 
 verificaVencedor(Board,Size,Winner):-
-        C is round(Size/2)+1,
+        C is round(Size/2),
         positionValue(Board,C,C,Winner).            
 
 
-vencedor(00):- write('Jogador X ganhou!').
-vencedor(11):- write('Jogador O ganhou!').
+vencedor(10):- write('Jogador O ganhou!').
+vencedor(11):- write('Jogador X ganhou!').
 vencedor(b):-  write('O jogo terminou com um empate!').
+vencedor(_):- write('Erro').
+        
 
 
 playerTrone(1,11).
-playerTrone(0,00).
+playerTrone(0,10).
 
-chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover?'),((Player =:= 0, write('Jogador X'));(Player =:= 1,write('Jogador O'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
+chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover?'),((Player =:= 0, write('Jogador O'));(Player =:= 1,write('Jogador X'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
                                                                                 canUsePiece(Board,X,Y,Player),
                                                                                 write('New X = '), read(XF),nl, write('New Y = '),read(YF),nl,
                                                                                 validMove(Board,Size,X,Y,XF,YF,Player), 
@@ -381,13 +406,13 @@ mostra(r):-
 mostra(b):-
         write(' . ').
 mostra(0):-
-        write(' x ').
-mostra(1):-
         write(' o ').
+mostra(1):-
+        write(' x ').
 mostra(11):-
-        write(' O ').
-mostra(00):-
         write(' X ').
+mostra(10):-
+        write(' O ').
 
 mostra(X):-
         write(X).
@@ -412,7 +437,7 @@ start :- repeat, nl, logo, write(' ---- MENU ----'), nl, nl,
                         read(C), C>0, C=<4, number(C), choice(C).
 
 /* Menu Options */
-choice(1) :- fillTabuleiro(13,Tab),play(Tab,13,0,0,0).
-choice(2) :- read(C),write(C).
-choice(3) :- main.
+choice(1) :- fillTabuleiro(Tab,9),imprime_tab(Tab),play(Tab,9,0,0,0).
+choice(2) :- fillTabuleiro(Tab,9),imprime_tab(Tab),play(Tab,9,0,0,1).
+choice(3) :- fillTabuleiro(Tab,9),imprime_tab(Tab),play(Tab,9,0,1,1).
 choice(4) :- abort.
