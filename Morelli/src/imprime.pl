@@ -338,16 +338,67 @@ printHeader(Size):-
         N is Size -1,
         printHeader(N),
         numberToLetter(X,Size),
-        write('  '),
+        write(' '),
         write(X),
         write('  ').
 
 printLine(Size,Espace):-
-        imprime(Espace,['|    ']),imprime((Size-2*Espace)*5,['-']),imprime(Espace,['    |']).
+        Half is (Size)/2,
+        Espace<Half,
+        imprime(Espace,['|   ']),imprime((Size-2*Espace)*4+1,['-']),imprime(Espace,['   |']).
         
+printLine(Size,Espace):-
+        Half is (Size)/2,
+        Espace>Half,
+        Espace1 is Size-Espace,
+        imprime(Espace1,['|   ']),imprime((Size-2*Espace1)*4+1,['-']),imprime(Espace1,['   |']).
         
+%imprime barras antes
+printLineMatrix(Size,[H|T],BarraAntes,BarraDepois):-
+        N is BarraAntes -1, BarraAntes>0,
+        NSize is Size-1,Size>0,
+        write('|'),mostra(H),
+        printLineMatrix(NSize,T,N,BarraDepois),!.
+
+%imprime elemnto unico
+printLineMatrix(Size,[H|T],0,BarraDepois):-
+        N is BarraDepois -1,
+        Size>0,Size < BarraDepois,
+        write('|'),
+        printLineMatrix(Size,[H|T],0,N),!.
+
+%imprime elemnto sem barras
+printLineMatrix(Size,[H|T],0,BarraDepois):-
+        N1 is Size -1,Size>0,Size =\= BarraDepois,
+        write(' '),mostra(H),
+        if(N1=BarraDepois,write(' '),true),
+        printLineMatrix(N1,T,0,BarraDepois),!.
 
 
+%imprime barras depois
+printLineMatrix(Size,[H|T],0,BarraDepois):-
+        N is BarraDepois -1, BarraDepois>0, Size=BarraDepois,
+        NSize is Size-1,Size>0,
+        mostra(H),write('|'),
+        printLineMatrix(NSize,T,0,N),!.
+
+printLineMatrix(0,[],0,0).
+
+imprimeTab(Tab,Size):-
+        printHeader(Size),nl,
+        imprimelinhas(Tab,Size,0),
+        printLine(Size,0),nl,
+        printHeader(Size),nl.
+
+imprimelinhas([H|T],Size,N):-
+        printLine(Size,N),nl,
+        N1 is N+1,
+        N2 is Size-N,
+        if(N<(Size/2),printLineMatrix(Size,H,N1,N1),printLineMatrix(Size,H,N2,N2)),
+        nl,
+        imprimelinhas(T,Size,N1).
+
+imprimelinhas([],_,_).        
 
 imprime_tab(Tab):-
         line_graphic(L),
@@ -369,7 +420,7 @@ imprime_linhas([Head|Tail],N):-   %descomentar em baixo para aspecto visual dife
         N1 is N+1,
         aux(N),
         imprime_aux(Head),  write(' |'),nl,
-         write('   '), imprime(13*3+3,['-']), nl,
+        write('   '), imprime(13*3+3,['-']), nl,
         imprime_linhas(Tail,N1).
 
  
