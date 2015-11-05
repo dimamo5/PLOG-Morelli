@@ -98,7 +98,7 @@ randomMove(Board,Size,Player,NewBoard):-
         nth0(0,Mov,X),nth0(1,Mov,Y),nth0(2,Mov,XF),nth0(3,Mov,YF),
         movePiece(Board,X,Y,XF,YF,NewBoard2,PecasAlteradas),
         changeTrone(NewBoard2,Size,PecasAlteradas,Player,NewBoard),
-        imprime_tab(NewBoard),nl,imprimeTrone(NewBoard,Size),!.
+        imprimeTab(NewBoard,Size),nl,nl,!.
 
 imprimeTrone(Board,Size):-
         C is round(Size/2),
@@ -152,13 +152,14 @@ checkInput(String,Size,X,Y):-
 
 
 
-chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover?'),((Player =:= 0, write('Jogador O'));(Player =:= 1,write('Jogador X'))),nl,write('Coords = '), read(Input),checkInput(Input,Size,X,Y),
+chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover?'),((Player =:= 0, write('Jogador O'));(Player =:= 1,write('Jogador X'))),nl,
+                                                                                write('Coords = '), read(Input),checkInput(Input,Size,X,Y),
                                                                                 canUsePiece(Board,X,Y,Player),
-                                                                                write('New Coords = '), read(InputF),checkInput(InputF,Size,XF,YF),
+                                                                                write('New Coords = '), read(InputF),checkInput(InputF,Size,XF,YF),nl,
                                                                                 validMove(Board,Size,X,Y,XF,YF,Player), 
                                                                                 movePiece(Board,X,Y,XF,YF,NewBoard2,PecasAlteradas),
                                                                                 changeTrone(NewBoard2,Size,PecasAlteradas,Player,NewBoard),
-                                                                                imprime_tab(NewBoard),!.
+                                                                                imprimeTab(NewBoard,Size),nl,nl,!.
                                                                                 
 chooseMove(Board,Size,Player,NewBoard):-write('Jogada Impossivel'),nl,nl,chooseMove(Board,Size,Player,NewBoard),!.  %caso falhe
 
@@ -314,9 +315,6 @@ decremento(X,Y,XF,YF,DX,DY):-           %deslocamento vertical
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
 %%%%%%%%%%%%%%%%%% IMPRESSï¿½O DO TABULEIRO %%%%%%%%%%%%%%%%%%%%%%%
-
-line_graphic(['    ',' A ', ' B ',' C ',' D ',' E ' ,' F ',' G '
-             ,' H ',' I ',' J ',' K ',' L ',' M ']). 
  
 numberToLetter('A',1).
 numberToLetter('B',2).
@@ -385,46 +383,22 @@ printLineMatrix(Size,[H|T],0,BarraDepois):-
 printLineMatrix(0,[],0,0).
 
 imprimeTab(Tab,Size):-
-        printHeader(Size),nl,
+        write('    '),printHeader(Size),nl,
         imprimelinhas(Tab,Size,0),
-        printLine(Size,0),nl,
-        printHeader(Size),nl.
+        write('   '),printLine(Size,0),nl,
+        write('    '),printHeader(Size),nl.
 
 imprimelinhas([H|T],Size,N):-
-        printLine(Size,N),nl,
+        write('   '),printLine(Size,N),nl,
         N1 is N+1,
         N2 is Size-N,
+        write(' '),write(N1),write(' '),
         if(N<(Size/2),printLineMatrix(Size,H,N1,N1),printLineMatrix(Size,H,N2,N2)),
-        nl,
-        imprimelinhas(T,Size,N1).
+        write(' '),write(N1),
+        nl,imprimelinhas(T,Size,N1).
 
 imprimelinhas([],_,_).        
 
-imprime_tab(Tab):-
-        line_graphic(L),
-        imprime_aux(L), nl, 
-        write('   '),     
-        imprime(13*3+3,['-']), nl,
-        imprime_linhas(Tab,1),!.
-
-aux(N):-
-        N < 10,
-        write(N),
-        write('  |').
-aux(N):-
-        write(N),
-        write(' |').
-        
- 
-imprime_linhas([Head|Tail],N):-   %descomentar em baixo para aspecto visual diferente
-        N1 is N+1,
-        aux(N),
-        imprime_aux(Head),  write(' |'),nl,
-        write('   '), imprime(13*3+3,['-']), nl,
-        imprime_linhas(Tail,N1).
-
- 
-imprime_linhas([],_).
 
 /*funï¿½ao auxiliar que imprime no ecra*/
 imprime_aux([H|T]):-
@@ -445,10 +419,6 @@ imprime(N,X):-
  
 imprime(0,_). /* caso base */  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-mostra(r):-
-       random_gen(X),
-       mostra(X).
 
 mostra(b):-
         write(' . ').
@@ -484,7 +454,15 @@ start :- repeat, nl, logo, write(' ---- MENU ----'), nl, nl,
                         read(C), C>0, C=<4, number(C), choice(C).
 
 /* Menu Options */
-choice(1) :- fillTabuleiro(Tab,9),imprime_tab(Tab),play(Tab,9,0,0,0).
-choice(2) :- fillTabuleiro(Tab,9),imprime_tab(Tab),play(Tab,9,0,0,1).
-choice(3) :- fillTabuleiro(Tab,9),imprime_tab(Tab),play(Tab,9,0,1,1).
+choice(1) :- selectTamanho(Size),fillTabuleiro(Tab,Size),imprimeTab(Tab,Size),nl,play(Tab,Size,0,0,0).
+choice(2) :- selectTamanho(Size),botDifficulty(Diff),fillTabuleiro(Tab,Size),imprimeTab(Tab,Size),nl,play(Tab,Size,0,0,Diff).
+choice(3) :- selectTamanho(Size),botDifficulty(Diff1),botDifficulty(Diff2),fillTabuleiro(Tab,Size),imprimeTab(Tab,Size),nl,play(Tab,Size,0,Diff1,Diff2).
 choice(4) :- abort.
+
+
+
+selectTamanho(Tamanho):-write('Tamanho'),nl,read(Tamanho),Tamanho>0,Tamanho=<13,number(Tamanho),Tamanho mod 2 =:=1.
+selectTamanho(Tamanho):-write('Tamanho Errado'),nl,selectTamanho(Tamanho),!.
+
+botDifficulty(Diff):-write('Dificuldade do Bot (1-Fácil 2-Médio)'),nl,read(Diff),Diff>0,Diff=<2,number(Diff).
+botDifficulty(Diff):-write('Dificuldade Errada'),nl,botDifficulty(Diff),!.
