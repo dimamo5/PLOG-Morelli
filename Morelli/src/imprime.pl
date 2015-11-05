@@ -2,21 +2,6 @@
 :-use_module(library(lists)).
 :-use_module(library(between)).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%% Funcao main %%%%%%%%%%%%%%%%%%%%%%%%
-
-                %% TODO !!!!!!!!!!!!!!!!!!!
-%%%%%% ALTERAR GERA�AO DAS LINHAS PARA ESTAREM DE ACORDO COM AS REGRAS
-%%%%%% ULTIMA LINHA = invert_color(reverse(1� LINHA))
-%%%%%% LINHA DA DIREITA = invert_color(reverse(LINHA da esquerda))
-
-main:-
-       fillTabuleiro(13,Tab),
-       imprime_tab(Tab).
-             
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-removehead([_|Tail], Tail).
-   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 replace([_|T], 1, X, [X|T]).
@@ -156,9 +141,20 @@ vencedor(_):- write('Erro').
 playerTrone(1,11).
 playerTrone(0,10).
 
-chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover?'),((Player =:= 0, write('Jogador O'));(Player =:= 1,write('Jogador X'))),nl,write('X = '), read(X),nl, write('Y = '), read(Y),nl,
+checkInput(String,Size,X,Y):-
+        name(String,Codes),
+        nth0(0,Codes,X1),
+        nth0(1,Codes,Y1),
+        X is X1-96,
+        Y is Y1-48,
+        X>0,X=<Size,
+        Y>0,Y=<Size.
+
+
+
+chooseMove(Board,Size,Player,NewBoard):- write('Que peca deseja mover?'),((Player =:= 0, write('Jogador O'));(Player =:= 1,write('Jogador X'))),nl,write('Coords = '), read(Input),checkInput(Input,Size,X,Y),
                                                                                 canUsePiece(Board,X,Y,Player),
-                                                                                write('New X = '), read(XF),nl, write('New Y = '),read(YF),nl,
+                                                                                write('New Coords = '), read(InputF),checkInput(InputF,Size,XF,YF),
                                                                                 validMove(Board,Size,X,Y,XF,YF,Player), 
                                                                                 movePiece(Board,X,Y,XF,YF,NewBoard2,PecasAlteradas),
                                                                                 changeTrone(NewBoard2,Size,PecasAlteradas,Player,NewBoard),
