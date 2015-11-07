@@ -80,15 +80,68 @@ play(Board,Size,1,Bot1,Bot2):-continueGame(Board,Size,1), whoPlays(Board,Size,1,
 
 play(Board,Size,_,_,_):-verificaVencedor(Board,Size,Winner),vencedor(Winner).
 
-
+%Player vs Player
 whoPlays(Board,Size,Player,NewBoard,0,0):-chooseMove(Board,Size,Player,NewBoard).
 
+%Player vs Bot level 1
 whoPlays(Board,Size,1,NewBoard,0,1):-randomMove(Board,Size,1,NewBoard).
 whoPlays(Board,Size,0,NewBoard,0,1):-chooseMove(Board,Size,0,NewBoard).
 
+%Player vs Bot level 2
+whoPlays(Board,Size,Player,NewBoard,2,2):-smartMove(Board,Size,Player,NewBoard).
+whoPlays(Board,Size,0,NewBoard,0,2):-chooseMove(Board,Size,0,NewBoard).
+
+%Bot level 1 vs Bot level 1
 whoPlays(Board,Size,Player,NewBoard,1,1):-randomMove(Board,Size,Player,NewBoard).
 
+%Bot level 1 vs Bot level 2
+whoPlays(Board,Size,1,NewBoard,1,2):-smartMove(Board,Size,1,NewBoard).
+whoPlays(Board,Size,0,NewBoard,1,2):-randomMove(Board,Size,0,NewBoard).
+
+%Bot level 2 vs Bot level 1
+whoPlays(Board,Size,1,NewBoard,2,1):-randomMove(Board,Size,1,NewBoard).
+whoPlays(Board,Size,0,NewBoard,2,1):-smartMove(Board,Size,0,NewBoard).
+
+%Bot level 2 vs Bot level 2
+whoPlays(Board,Size,Player,NewBoard,2,2):-smartMove(Board,Size,Player,NewBoard).
+    
+    
+smartMove(Board,Size,Player,NewBoard):-
+        findall([X,Y],positionValue(Board,X,Y,Player),PiecesPlayer),
+        getAllMoves(PiecesPlayer,Board,Size,AllMoves),
+        evaluate_and_choose(Board,Size,AllMoves, Player ,-9999, BestMove),
+        nth0(0,BestMove,X1),nth0(1,BestMove,Y1),nth0(2,BestMove,XF1),nth0(3,BestMove,YF1),
+        movePiece(Board,X1,Y1,XF1,YF1,NewBoard,PecasAlteradas),
+        changeTrone(NewBoard,Size,PecasAlteradas,Player,NewBoard),
+        imprimeTab(NewBoard,Size),nl,nl,!.
+
+
+evaluate_and_choose(_,_,[], _ ,_, _).
+
+evaluate_and_choose(Board,Size,[[X,Y,XF,YF] | T], Player ,Score, BestMove):-
+                                write(X),write(Y),write(XF),write(YF),
+                                movePiece(Board,X,Y,XF,YF,NewBoard,PecasAlteradas),
+                                evaluateBoard(NewBoard,Size,Player,Value,PecasAlteradas,[X,Y,XF,YF]),
+                                update(Score, Value,[X,Y,XF,YF], BestMove),
+                                evaluate_and_choose(Board,Size,T, Player ,Score, BestMove).
+
+
+update(Score,Value,_,_):- Score >= Value.
+update(Score,Value,[X,Y,XF,YF],BestMove):- Score < Value,BestMove = [X,Y,XF,YF].
         
+evaluateBoard(Board,Size,Player,Value,_,_):-  \+(continueGame(Board,Size,Player)),Value is 10000.
+evaluateBoard(Board,Size,Player,Value,PecasAlteradas,_):- changeTrone(Board,Size,PecasAlteradas,Player,_),Value is 5000.
+evaluateBoard(Board,_,Player,Value,_,_):-  numberOfPieces(Board,_,Player,Number),Value is 100*Number.
+evaluateBoard(_,_,_,Value,_,[X,Y,XF,YF]):-frame(X,Y,XF,YF,R),Value is R*10.
+evaluateBoard(_,_,_,Value,_,_):-random(0,10,V),Value is V.
+
+
+numberOfPieces(Board,_,Player,Number):-
+        findall([X,Y],positionValue(Board,X,Y,Player),Bag),
+        length(Bag,ListSize),
+        Number is ListSize/2.
+                        
+
 randomMove(Board,Size,Player,NewBoard):-
         findall([X,Y],positionValue(Board,X,Y,Player),Bag),
         getAllMoves(Bag,Board,Size,Res),
@@ -198,8 +251,7 @@ imprimex([H|T]):-
         imprimex(T).
 
 %Verifica se � possivel efectuar um movimento
-validMove(Board,Size,X,Y,XF,YF,Player):-
-        %TODO: ver prox lina falha qd resultado = no
+validMove(Board,Size,X,Y,XF,YF,_):-
         between(1,Size,XF),
         between(1,Size,YF),
         \+ pontosIguais(X,Y,XF,YF),                             % PosInicial != posFinal
@@ -262,7 +314,7 @@ positionValue(Board,X,Y,V):- nth1(Y,Board,Linha),nth1(X,Linha,V).
 freeSpace(Board,X,Y):-nth1(Y,Board,Linha),nth1(X,Linha,Peca),Peca = b. 
 
 %verifica no caso de segmento de recta ser obliquo: se declive = 1 ou -1 -> movimento diagonal
-declive_recta(X,Y,XF,YF):- X =:= XF,!.                    %seg recta vertical
+declive_recta(X,_,XF,_):- X =:= XF,!.                    %seg recta vertical
 declive_recta(X,Y,XF,YF):- ((YF-Y)/(XF-X)) =:= 0,!.       %seg recta horizontal
 declive_recta(X,Y,XF,YF):- abs((YF-Y)/(XF-X)) =:= 1,!.       %seg recta diagonal
 
@@ -286,7 +338,7 @@ checkFreeWay(Board,X,Y,XF,YF):-
         decremento(X,Y,XF,YF,DX,DY),            % devolve decremento/incremento a ser aplicado
         checkFreeWayAux(Board,X,Y,XF,YF,DX,DY). % itera ate PosActual == PosFinal
 
-checkFreeWayAux(Board,X,Y,X2,Y2,DX,DY):-pontosIguais(X,Y,X2,Y2).
+checkFreeWayAux(_,X,Y,X2,Y2,_,_):-pontosIguais(X,Y,X2,Y2).
 
 checkFreeWayAux(Board,X,Y,X2,Y2,DX,DY):-
         \+ pontosIguais(X,Y,X2,Y2),          % enquanto nao chegar a posFinal continua
@@ -372,7 +424,6 @@ printLineMatrix(Size,[H|T],0,BarraDepois):-
         if(N1=BarraDepois,write(' '),true),
         printLineMatrix(N1,T,0,BarraDepois),!.
 
-
 %imprime barras depois
 printLineMatrix(Size,[H|T],0,BarraDepois):-
         N is BarraDepois -1, BarraDepois>0, Size=BarraDepois,
@@ -399,15 +450,12 @@ imprimelinhas([H|T],Size,N):-
 
 imprimelinhas([],_,_).        
 
-
 /*fun�ao auxiliar que imprime no ecra*/
 imprime_aux([H|T]):-
         mostra(H),
         imprime_aux(T).
 
 imprime_aux([]). /* caso base */
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /* imprime uma determinada lista X, N vezes */
@@ -437,11 +485,9 @@ mostra(X):-
 random_gen(V):-
         random(0,2,V).
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
                         /* menu */
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
-
 
 logo :-  nl, write('***   MORRELLI  ***'), nl, nl.
 
@@ -458,8 +504,6 @@ choice(1) :- selectTamanho(Size),fillTabuleiro(Tab,Size),imprimeTab(Tab,Size),nl
 choice(2) :- selectTamanho(Size),botDifficulty(Diff),fillTabuleiro(Tab,Size),imprimeTab(Tab,Size),nl,play(Tab,Size,0,0,Diff).
 choice(3) :- selectTamanho(Size),botDifficulty(Diff1),botDifficulty(Diff2),fillTabuleiro(Tab,Size),imprimeTab(Tab,Size),nl,play(Tab,Size,0,Diff1,Diff2).
 choice(4) :- abort.
-
-
 
 selectTamanho(Tamanho):-write('Tamanho'),nl,read(Tamanho),Tamanho>0,Tamanho=<13,number(Tamanho),Tamanho mod 2 =:=1.
 selectTamanho(Tamanho):-write('Tamanho Errado'),nl,selectTamanho(Tamanho),!.
