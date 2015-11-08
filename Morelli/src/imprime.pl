@@ -219,18 +219,18 @@ checkTrone(Board,Size,XF,YF,Player,NewBoard):-
       C is round(Size/2),
       DiffX is XF-C,
       DiffY is YF-C,
-      X1 is -DiffX+C,
-      Y1 is DiffY+C,
-      X2 is DiffX+C,
+      X1 is -DiffY+C,
+      Y1 is DiffX+C,
+      X2 is -DiffX+C,
       Y2 is -DiffY+C,
-      X3 is -DiffX+C,
-      Y3 is -DiffY+C,
+      X3 is DiffY+C,
+      Y3 is -DiffX+C,
       positionValue(Board,X1,Y1,Player),
       positionValue(Board,X2,Y2,Player),
       positionValue(Board,X3,Y3,Player),
       playerTrone(Player,Trone),
       replaceElemMatrix(Board,C,C,Trone,NewBoard),
-      write([X1,Y1,X2,Y2,X3,Y3]).
+      write([DiffX,DiffY,X1,Y1,X2,Y2,X3,Y3]).
 
 
 changeTrone(Board,_,[],_,Board).
