@@ -229,7 +229,8 @@ checkTrone(Board,Size,XF,YF,Player,NewBoard):-
       positionValue(Board,X2,Y2,Player),
       positionValue(Board,X3,Y3,Player),
       playerTrone(Player,Trone),
-      replaceElemMatrix(Board,C,C,Trone,NewBoard).
+      replaceElemMatrix(Board,C,C,Trone,NewBoard),
+      write([X1,Y1,X2,Y2,X3,Y3]).
 
 
 changeTrone(Board,_,[],_,Board).
@@ -321,7 +322,8 @@ declive_recta(X,Y,XF,YF):- abs((YF-Y)/(XF-X)) =:= 1,!.       %seg recta diagonal
 verifyFrame(X,Y,XF,YF,Size):-
         frame(XF,YF,Size,F1),    %frame ponto final
         frame(X,Y,Size,F2),      %frame ponto inicial
-        F1<F2.                  %impede jogada em que posFinal = posCentral
+        F1>F2,
+        F1 =\= round(Size/2).                  
 
 frame(X,Y,Size,Level):-
         if(X>round(Size/2),ResX is Size-X+1,ResX is X),
