@@ -319,11 +319,9 @@ declive_recta(X,Y,XF,YF):- abs((YF-Y)/(XF-X)) =:= 1,!.       %seg recta diagonal
 
 %verifica se esta a mover para o centro    
 verifyFrame(X,Y,XF,YF,Size):-
-        C is round(Size/2),
-        frame(XF,YF,C,C,F1),    %frame ponto final
-        frame(X,Y,C,C,F2),      %frame ponto inicial
-        F2 > F1,
-        F1 =\= 0.                  %impede jogada em que posFinal = posCentral
+        frame(XF,YF,Size,F1),    %frame ponto final
+        frame(X,Y,Size,F2),      %frame ponto inicial
+        F1<F2.                  %impede jogada em que posFinal = posCentral
 
 frame(X,Y,Size,Level):-
         if(X>round(Size/2),ResX is Size-X+1,ResX is X),
