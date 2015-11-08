@@ -111,28 +111,29 @@ smartMove(Board,Size,Player,NewBoard):-
         getAllMoves(PiecesPlayer,Board,Size,AllMoves),
         evaluate_and_choose(Board,Size,AllMoves, Player ,-9999, BestMove,BestMoveF),
         nth0(0,BestMoveF,X1),nth0(1,BestMoveF,Y1),nth0(2,BestMoveF,XF1),nth0(3,BestMoveF,YF1),
-        movePiece(Board,X1,Y1,XF1,YF1,NewBoard,PecasAlteradas),
-        changeTrone(NewBoard,Size,PecasAlteradas,Player,NewBoard),
-        imprimeTab(NewBoard,Size),nl,write(XF1),write(' '),write(YF1),nl,!.
+        movePiece(Board,X1,Y1,XF1,YF1,NewBoard1,PecasAlteradas),
+        changeTrone(NewBoard1,Size,PecasAlteradas,Player,NewBoard),
+        imprimeTab(NewBoard,Size),nl,write(X1),write(' '),write(Y1),write(' '),write(XF1),write(' '),write(YF1),nl,!.
 
 
-evaluate_and_choose(_,_,[], _ ,Score, BestMove,BestMove):- write('Score final: '),write(Score),write('  Move:'),write(BestMove).
+evaluate_and_choose(_,_,[], _ ,Score, BestMove,BestMove).%:- write('Score final: '),write(Score),write('  Move:'),write(BestMove).
 
 evaluate_and_choose(Board,Size,[[X,Y,XF,YF] | T], Player ,Score, BestMove,BestMoveF):-
                                 movePiece(Board,X,Y,XF,YF,NewBoard,PecasAlteradas),
                                 evaluateBoard(NewBoard,Size,Player,Value,PecasAlteradas,[X,Y,XF,YF]),
-                                write('Score Antes: '),write(Value),
-                                update(Score, Value,Value1,[X,Y,XF,YF], BestMove),
-                                write('Score Depois: '),write(Value1),
-                                evaluate_and_choose(Board,Size,T, Player ,Value1, BestMove,BestMoveF).
+                                %write('Score Antes: '),write(Value),
+                                update(Score, Value,Value1,BestMove,[X,Y,XF,YF], BestMove1),
+                                %write('Score Depois: '),write(Value1),write('  Move:'),write(BestMove1),
+                                evaluate_and_choose(Board,Size,T, Player ,Value1, BestMove1,BestMoveF).
 
-update(Score,Value,Score,_,_):- Score >= Value.
-update(Score,Value,Value,BestMove,BestMove):- Score < Value. %Falha e estou farto que isto de paido fds
+update(Score,Value,Score,OldMove,_,OldMove):- Score > Value.
+update(Score,Value,Value,_,BestMove,BestMove):- Score =< Value. %Falha e estou farto que isto de paido fds
+
         
 evaluateBoard(Board,Size,Player,Value,_,_):-  \+(continueGame(Board,Size,Player)),Value is 10000,write('Ganha: '),write(Value).
 evaluateBoard(Board,Size,Player,Value,PecasAlteradas,[X,Y,XF,YF]):- checkTrone(Board,Size,XF,YF,Player,_),Value is 5000,write('Fica Trono: '),write(Value).
 evaluateBoard(Board,_,Player,Value,_,[X,Y,XF,YF]):- numberOfPieces(Board,_,Player,Number),frame(X,Y,XF,YF,R),Value is 100*Number+(10*R)/2.
-evaluateBoard(_,_,_,Value,_,[X,Y,XF,YF]):-frame(X,Y,XF,YF,R),Value is R*10,write('Outro: ').
+evaluateBoard(_,_,_,Value,_,[X,Y,XF,YF]):-frame(X,Y,XF,YF,R),Value is R*10,write('=======ERRO========').
 
 
 numberOfPieces(Board,_,Player,Number):-
@@ -324,12 +325,15 @@ verifyFrame(X,Y,XF,YF,Size):-
         F2 > F1,
         F1 =\= 0.                  %impede jogada em que posFinal = posCentral
 
-       
+frame(X,Y,Size,Level):-
+        if(X>round(Size/2),ResX is Size-X+1,ResX is X),
+        if(Y>round(Size/2),ResY is Size-Y+1,ResY is Y),
+        Level is min(ResX,ResY).
+         
 %frame de 1 ponto = distancia do centro ao ponto
-frame(X1,Y1,X2,Y2,R):-
-                R is sqrt(exp(X2-X1,2) + exp(Y2-Y1,2)). 
+%frame(X1,Y1,X2,Y2,R):-
+%                R is sqrt(exp(X2-X1,2) + exp(Y2-Y1,2)). 
            
-
 %verifica se nao existe nenhum elemento entre pos inicial e pos final
 checkFreeWay(Board,X,Y,XF,YF):-
         decremento(X,Y,XF,YF,DX,DY),            % devolve decremento/incremento a ser aplicado
