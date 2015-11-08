@@ -88,7 +88,7 @@ whoPlays(Board,Size,1,NewBoard,0,1):-randomMove(Board,Size,1,NewBoard).
 whoPlays(Board,Size,0,NewBoard,0,1):-chooseMove(Board,Size,0,NewBoard).
 
 %Player vs Bot level 2
-whoPlays(Board,Size,Player,NewBoard,2,2):-smartMove(Board,Size,Player,NewBoard).
+whoPlays(Board,Size,1,NewBoard,0,2):-smartMove(Board,Size,1,NewBoard).
 whoPlays(Board,Size,0,NewBoard,0,2):-chooseMove(Board,Size,0,NewBoard).
 
 %Bot level 1 vs Bot level 1
@@ -109,38 +109,35 @@ whoPlays(Board,Size,Player,NewBoard,2,2):-smartMove(Board,Size,Player,NewBoard).
 smartMove(Board,Size,Player,NewBoard):-
         findall([X,Y],positionValue(Board,X,Y,Player),PiecesPlayer),
         getAllMoves(PiecesPlayer,Board,Size,AllMoves),
-        evaluate_and_choose(Board,Size,AllMoves, Player ,-9999, BestMove),
-        nth0(0,BestMove,X1),nth0(1,BestMove,Y1),nth0(2,BestMove,XF1),nth0(3,BestMove,YF1),
+        evaluate_and_choose(Board,Size,AllMoves, Player ,-9999, BestMove,BestMoveF),
+        nth0(0,BestMoveF,X1),nth0(1,BestMoveF,Y1),nth0(2,BestMoveF,XF1),nth0(3,BestMoveF,YF1),
         movePiece(Board,X1,Y1,XF1,YF1,NewBoard,PecasAlteradas),
         changeTrone(NewBoard,Size,PecasAlteradas,Player,NewBoard),
-        imprimeTab(NewBoard,Size),nl,nl,!.
+        imprimeTab(NewBoard,Size),nl,write(XF1),write(' '),write(YF1),nl,!.
 
 
-evaluate_and_choose(_,_,[], _ ,_, _).
+evaluate_and_choose(_,_,[], _ ,Score, BestMove,BestMove):- write('Score final: '),write(Score),write('  Move:'),write(BestMove).
 
-evaluate_and_choose(Board,Size,[[X,Y,XF,YF] | T], Player ,Score, BestMove):-
-                                write(X),write(Y),write(XF),write(YF),
+evaluate_and_choose(Board,Size,[[X,Y,XF,YF] | T], Player ,Score, BestMove,BestMoveF):-
                                 movePiece(Board,X,Y,XF,YF,NewBoard,PecasAlteradas),
                                 evaluateBoard(NewBoard,Size,Player,Value,PecasAlteradas,[X,Y,XF,YF]),
-                                update(Score, Value,[X,Y,XF,YF], BestMove),
-                                evaluate_and_choose(Board,Size,T, Player ,Score, BestMove).
+                                write('Score Antes: '),write(Value),
+                                update(Score, Value,Value1,[X,Y,XF,YF], BestMove),
+                                write('Score Depois: '),write(Value1),
+                                evaluate_and_choose(Board,Size,T, Player ,Value1, BestMove,BestMoveF).
 
-
-update(Score,Value,_,_):- Score >= Value.
-update(Score,Value,[X,Y,XF,YF],BestMove):- Score < Value,BestMove = [X,Y,XF,YF].
+update(Score,Value,Score,_,_):- Score >= Value.
+update(Score,Value,Value,BestMove,BestMove):- Score < Value. %Falha e estou farto que isto de paido fds
         
-evaluateBoard(Board,Size,Player,Value,_,_):-  \+(continueGame(Board,Size,Player)),Value is 10000.
-evaluateBoard(Board,Size,Player,Value,PecasAlteradas,_):- changeTrone(Board,Size,PecasAlteradas,Player,_),Value is 5000.
-evaluateBoard(Board,_,Player,Value,_,_):-  numberOfPieces(Board,_,Player,Number),Value is 100*Number.
-evaluateBoard(_,_,_,Value,_,[X,Y,XF,YF]):-frame(X,Y,XF,YF,R),Value is R*10.
-evaluateBoard(_,_,_,Value,_,_):-random(0,10,V),Value is V.
+evaluateBoard(Board,Size,Player,Value,_,_):-  \+(continueGame(Board,Size,Player)),Value is 10000,write('Ganha: '),write(Value).
+evaluateBoard(Board,Size,Player,Value,PecasAlteradas,[X,Y,XF,YF]):- checkTrone(Board,Size,XF,YF,Player,_),Value is 5000,write('Fica Trono: '),write(Value).
+evaluateBoard(Board,_,Player,Value,_,[X,Y,XF,YF]):- numberOfPieces(Board,_,Player,Number),frame(X,Y,XF,YF,R),Value is 100*Number+(10*R)/2.
+evaluateBoard(_,_,_,Value,_,[X,Y,XF,YF]):-frame(X,Y,XF,YF,R),Value is R*10,write('Outro: ').
 
 
 numberOfPieces(Board,_,Player,Number):-
         findall([X,Y],positionValue(Board,X,Y,Player),Bag),
-        length(Bag,ListSize),
-        Number is ListSize/2.
-                        
+        length(Bag,Number).
 
 randomMove(Board,Size,Player,NewBoard):-
         findall([X,Y],positionValue(Board,X,Y,Player),Bag),
@@ -443,9 +440,9 @@ imprimelinhas([H|T],Size,N):-
         write('   '),printLine(Size,N),nl,
         N1 is N+1,
         N2 is Size-N,
-        write(' '),write(N1),write(' '),
+        writeNumber(N1),write(' '),
         if(N<(Size/2),printLineMatrix(Size,H,N1,N1),printLineMatrix(Size,H,N2,N2)),
-        write(' '),write(N1),
+        writeNumber(N1),
         nl,imprimelinhas(T,Size,N1).
 
 imprimelinhas([],_,_).        
@@ -478,9 +475,12 @@ mostra(11):-
         write(' X ').
 mostra(10):-
         write(' O ').
-
 mostra(X):-
         write(X).
+
+writeNumber(N):-N1 is N-10, N1>=0,write(N).
+writeNumber(N):-write(' '),write(N).
+
 
 random_gen(V):-
         random(0,2,V).
